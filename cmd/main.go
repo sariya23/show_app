@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"show/internal/config"
 	"show/internal/handler"
 	"show/internal/middleware"
 
@@ -14,11 +15,14 @@ import (
 )
 
 func main() {
+	cfg := config.MustLoad()
 	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	log.Info("starting app")
 	conn, err := grpc.NewClient("localhost:44044", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}
+	log.Info("grpc connection is established")
 	defer conn.Close()
 	client := ssov1.NewAuthClient(conn)
 	router := gin.Default()
@@ -26,7 +30,7 @@ func main() {
 	router.POST("/register", h.Register)
 	router.GET("/login", h.Login)
 	protected := router.Group("/profile")
-	protected.Use(middleware.AuthMiddleware())
+	protected.Use(middleware.AuthMiddleware([]byte(cfg.JWTSecret)))
 	protected.GET("/:uid", func(c *gin.Context) {
 		userID, _ := c.Get("uid")
 		email, _ := c.Get("email")

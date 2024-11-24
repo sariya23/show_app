@@ -9,10 +9,9 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-var jwtSecret = []byte("test-secret")
-
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(jwtSecret []byte) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var jwtSecret = []byte("test-secret")
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
