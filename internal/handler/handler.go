@@ -10,6 +10,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	ssov1 "github.com/sariya23/sso_proto/gen/sso"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type LoginRequest struct {
@@ -85,8 +87,13 @@ func (h *Handler) Register(c *gin.Context) {
 	client := h.GrpcClient
 	response, err := client.Register(ctx, &ssov1.RegisterRequest{Email: r.Login, Password: r.Password})
 	if err != nil {
+		if status.Code(err) == codes.InvalidArgument {
+			log.Error("blank email or password", slog.String("err", err.Error()))
+			c.JSON(http.StatusBadRequest, gin.H{"message": "invalid arguments", "details": "blank password or email"})
+			return
+		}
 		log.Error("smth wrong in sso service", slog.String("err", err.Error()))
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal error in sso service", "err": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal error in sso service"})
 		return
 	}
 	log.Info("register success")

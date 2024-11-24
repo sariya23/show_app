@@ -40,10 +40,10 @@ func AuthMiddleware(jwtSecret []byte) gin.HandlerFunc {
 			return
 		}
 
-		var userID float64
+		var userID int
 		var email string
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			userID = claims["uid"].(float64)
+			userID = claims["uid"].(int)
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			email = claims["email"].(string)
