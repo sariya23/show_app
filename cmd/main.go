@@ -19,7 +19,7 @@ func main() {
 	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	log.Info("starting app")
 
-	conn, err := grpc.NewClient("localhost:44044", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("app:44044", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +35,7 @@ func main() {
 
 	protected := router.Group("/profile")
 	protected.Use(middleware.AuthMiddleware([]byte(cfg.JWTSecret)))
-	protected.GET("/:uid", func(c *gin.Context) {
+	protected.GET("/", func(c *gin.Context) {
 		userID, _ := c.Get("uid")
 		email, _ := c.Get("email")
 		c.JSON(http.StatusOK, gin.H{

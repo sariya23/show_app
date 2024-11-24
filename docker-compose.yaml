@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  app-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app-service
+    ports:
+      - "8082:8082"
+    networks:
+      - show_network
+    command: go run cmd/main.go --config=./config/local.yaml
+
+networks:
+  show_network:
+    external: true
